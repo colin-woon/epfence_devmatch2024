@@ -89,8 +89,8 @@ def report_to_kwsp():
 
 def pay_fine_to_kwsp():
     data = {
-        "wallet_address": EPFENSE_ADMIN_WALLET,
-        "to": EMPLOYER_WALLET,
+        "wallet_address": EMPLOYER_WALLET,
+        "to": EPFENSE_ADMIN_WALLET,
         "amount": "1",
         "contract_address": PENALTY_SC_ADDRESS,
         "callback_url": "http://localhost:8501",
@@ -137,3 +137,17 @@ def check_wallet_owner(wallet_address):
     response = response.json()
 
     return response["result"]["name"]
+
+
+def burn_for_penalty(amount):
+    data = {
+        "wallet_address": EPFENSE_ADMIN_WALLET,
+        "to": EMPLOYEE_WALLET,
+        "amount": str(amount),
+        "contract_address": REPORT_SC_ADDRESS,
+        "callback_url": "http://localhost:8501",
+    }
+
+    response = requests.post(f"{API_URL}/api/token/burn", headers=headers, json=data)
+
+    return response.json()

@@ -2,7 +2,13 @@ import streamlit as st
 import requests
 import pandas as pd
 from streamlit_option_menu import option_menu
-from utils import check_contribution, highlight_rows_report, highlight_rows_penalty
+from utils import (
+    check_contribution,
+    highlight_rows_report,
+    highlight_rows_penalty,
+    exceed_report_token_threshold,
+    pay_fine_dialog,
+)
 from maschain_api import (
     provide_penalty_token,
     provide_report_token,
@@ -13,6 +19,7 @@ from maschain_api import (
     get_report_token_transaction,
     get_penalty_token_transaction,
     check_wallet_owner,
+    burn_for_penalty,
 )
 
 
@@ -37,7 +44,7 @@ st.set_page_config(
 
 # Options Menu
 with st.sidebar:
-    st.image("img/kwsp_logo.jpg", use_column_width=True)
+    st.image("img/EPFense_logo.jpg", use_column_width=True)
     sidebar_choice = option_menu(
         "EPFense",
         [
@@ -66,6 +73,8 @@ if sidebar_choice == "Simulate Contribution":
             response = provide_report_token()
             # st.write(response)
             if response["status"] == 200:
+                response = get_report_token_balance()
+                st.session_state.report_token_amount = response["result"]
                 st.error(
                     "Report token credited to employee wallet! Please make report to KWSP!",
                     icon="❗",
@@ -74,8 +83,6 @@ if sidebar_choice == "Simulate Contribution":
                 st.error(response)
 
 if sidebar_choice == "Employee Dashboard":
-    response = get_report_token_balance()
-    st.session_state.report_token_amount = response["result"]
     # st.write(response)
 
     menu_option = option_menu(
@@ -86,24 +93,40 @@ if sidebar_choice == "Employee Dashboard":
         default_index=0,
         orientation="horizontal",
     )
-
+    report_token_threshold = 3
     if menu_option == "Home":
+        response = get_report_token_balance()
+        st.session_state.report_token_amount = response["result"]
         # st.write(st.session_state.report_token_amount)
         if st.session_state.report_token_amount != "0":
-            st.error(
-                "You have LAP tokens! Please submit a token to make a report to KWSP!",
-                icon="❗",
-            )
-            if st.button("Make Report", type="primary"):
-                response = report_to_kwsp()
+            if exceed_report_token_threshold(
+                float(st.session_state.report_token_amount), report_token_threshold
+            ):
+                st.warning(
+                    "You have exceeded the report token threshold, the system will burn your tokens and send a penalty to the employee",
+                    icon="⚠️",
+                )
+                response = burn_for_penalty(report_token_threshold)
                 st.write(response)
                 if response["status"] == 200:
-                    response = get_report_token_balance()
-                    st.session_state.report_token_amount = response["result"]
+                    new_response = provide_penalty_token()
+                    st.write(new_response)
+                    if new_response["status"] == 200:
+                        st.info(
+                            "KWSP will take legal action on your behalf. Please refresh the page.",
+                            icon="ℹ️",
+                        )
+            else:
+                st.error(
+                    "You have LAP tokens! Please submit a token in 'Wallet' menu to make a report to KWSP!",
+                    icon="❗",
+                )
         else:
             st.success("Good Afternoon!", icon="👋")
 
     if menu_option == "Wallet":
+        response = get_report_token_balance()
+        st.session_state.report_token_amount = response["result"]
         st.header("")
         left_co, cent_co, last_co = st.columns(3, vertical_alignment="center")
 
@@ -136,15 +159,9 @@ if sidebar_choice == "Employer Dashboard":
         # st.write(st.session_state.penalty_token_amount)
         if st.session_state.penalty_token_amount != "0":
             st.error(
-                "You have DEN tokens! KWSP is taking legal action! Please reimburse the proper amount to EPF and pay the fine!",
+                "You have DEN tokens! KWSP is taking legal action! Please reimburse the proper amount to EPF and pay the fine at 'Penalty' menu!",
                 icon="❗",
             )
-            if st.button("Pay Fine", type="primary"):
-                response = pay_fine_to_kwsp()
-                st.write(response)
-                if response["status"] == 200:
-                    response = get_penalty_token_balance()
-                    st.session_state.penalty_token_amount = response["result"]
         else:
             st.success("Good Afternoon!", icon="👋")
 
@@ -160,11 +177,11 @@ if sidebar_choice == "Employer Dashboard":
             )
             if st.button("Pay Fine", type="primary"):
                 response = pay_fine_to_kwsp()
+                pay_fine_dialog()
                 # st.write(response)
                 if response["status"] == 200:
                     response = get_penalty_token_balance()
                     st.session_state.penalty_token_amount = response["result"]
-                    st.success("Successfully paid penalty fine.", icon="✅")
 
 if sidebar_choice == "EPF Admin Dashboard":
     response = get_penalty_token_balance()
