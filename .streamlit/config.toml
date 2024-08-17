@@ -1,5 +1,8 @@
 [theme]
-primaryColor="#3fb0e8"
-backgroundColor="#192841"
-secondaryBackgroundColor="#3fb0e8"
-textColor="#f9f9f9"
+primaryColor="#cf8b1d"
+backgroundColor="#04317d"
+secondaryBackgroundColor="#ffffff"
+textColor="#bbbbbb"
+
+[browser]
+gatherUsageStats = false
