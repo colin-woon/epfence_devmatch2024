@@ -140,6 +140,10 @@ if sidebar_choice == "Employee Dashboard":
                 if response["status"] == 200:
                     response = get_report_token_balance()
                     st.session_state.report_token_amount = response["result"]
+                    st.success(
+                        "Report has been sent to EPF. Please refresh the page to update wallet balance.",
+                        icon="✅",
+                    )
 
 if sidebar_choice == "Employer Dashboard":
     response = get_penalty_token_balance()
