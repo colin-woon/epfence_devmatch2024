@@ -1,5 +1,4 @@
-# epfence_devmatch2024
-
+# Devmatch2024 Hackathon Project
 ## Execution Steps
 ```
 python3 -m venv venv
@@ -7,6 +6,39 @@ source venv/bin/activate
 pip install -r requirements.txt
 streamlit run app.py
 ```
+# EPFense
+
+**EPFense** is a Streamlit-based web application that simulates the management of employer contributions, employee deductions, and penalty enforcement for a provident fund system.
+
+## Overview
+
+EPFense allows users to:
+
+- Simulate employer and employee contributions.
+- Manage report and penalty tokens using a blockchain-like system.
+- Access personalized dashboards for employees, employers, and administrators.
+
+## Technologies Used
+
+- **Streamlit**: For building the interactive web interface and dashboards.
+- **Requests**: To interact with the MASCHAIN API for token operations.
+- **Pandas**: For data manipulation and display in tabular form.
+- **MASCHAIN API**: Handles token minting, burning, transferring, and balance checks.
+- **Session State**: Manages state variables across user interactions.
+- **Streamlit Option Menu**: Provides sidebar and horizontal menu navigation.
+- **Environment Variables**: Securely stores API URLs, client IDs, and wallet addresses.
+
+## Features
+
+- **Contribution Simulation**: Simulate and validate employer and employee contributions.
+- **Token Management**: Employees receive report tokens; employers receive penalty tokens based on compliance.
+- **Dashboard Views**:
+  - **Employee Dashboard**: Manage report tokens and submit reports.
+  - **Employer Dashboard**: Monitor and pay penalties.
+  - **EPF Admin Dashboard**: Oversee reports and penalties, with options to penalize employers.
+- **Transaction History**: View token transactions with conditional highlights.
+- **Automated Penalization**: Automatically penalizes when report token thresholds are exceeded.
+
 # Maschain Block Explorer Link
 ## LAP Token  
 [https://explorer-testnet.maschain.com/0xa395ba475eb9c2cd4a342565431792a7cc0f4a19dec17636cd6af387b368e3d9](https://explorer-testnet.maschain.com/0xa395ba475eb9c2cd4a342565431792a7cc0f4a19dec17636cd6af387b368e3d9)  
